@@ -862,11 +862,23 @@
             // 清理过期的星座运势缓存
             constellationCache.cleanup();
             
+            // 临时清除所有星座缓存以测试API调用
+            console.log('清除所有星座缓存以测试API调用');
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('constellation_')) {
+                    localStorage.removeItem(key);
+                    console.log(`已清除缓存: ${key}`);
+                }
+            });
+            
             // 初始化Tab导航按钮状态
             updateTabNavButtons();
             
-            // 默认选中白羊座
-            selectConstellation('aries');
+            // 延迟选中白羊座，确保DOM完全加载
+            setTimeout(() => {
+                console.log('开始初始化默认星座选择');
+                selectConstellation('aries');
+            }, 100);
             
             // 监听Tab容器滚动事件
             const tabsContainer = document.getElementById('tabs-container');
@@ -874,19 +886,21 @@
             
             // 监听窗口大小变化
             window.addEventListener('resize', updateTabNavButtons);
+            
+            // 每分钟更新一次时间
+            setInterval(updateCurrentDate, 60000);
         });
         
         // 更新当前日期显示
         function updateCurrentDate() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const weekday = weekdays[now.getDay()];
-            
-            const dateString = `${year}-${month}-${day} ${weekday}`;
-            document.getElementById('current-date').textContent = dateString;
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options);
         }
         
         // 加载一言
@@ -951,13 +965,37 @@
             if (!data) return indices;
             
             // 处理结构化数据
-            if (typeof data === 'object' && data.indices) {
-                indices.comprehensive = data.indices.comprehensive || 0;
-                indices.love = data.indices.love || 0;
-                indices.work = data.indices.work || 0;
-                indices.money = data.indices.money || 0;
-                indices.health = data.indices.health || 0;
-                return indices;
+            if (typeof data === 'object') {
+                // 优先使用indices字段
+                if (data.indices) {
+                    indices.comprehensive = data.indices.comprehensive || 0;
+                    indices.love = data.indices.love || 0;
+                    indices.work = data.indices.work || 0;
+                    indices.money = data.indices.money || 0;
+                    indices.health = data.indices.health || 0;
+                    return indices;
+                }
+                
+                // 兼容其他可能的字段名
+                if (data.comprehensive_score) indices.comprehensive = data.comprehensive_score;
+                if (data.love_score) indices.love = data.love_score;
+                if (data.work_score) indices.work = data.work_score;
+                if (data.money_score) indices.money = data.money_score;
+                if (data.health_score) indices.health = data.health_score;
+                
+                // 兼容直接字段名
+                if (data.comprehensive) indices.comprehensive = data.comprehensive;
+                if (data.love) indices.love = data.love;
+                if (data.work) indices.work = data.work;
+                if (data.career) indices.work = data.career; // career也可能表示事业
+                if (data.money) indices.money = data.money;
+                if (data.wealth) indices.money = data.wealth; // wealth也可能表示财运
+                if (data.health) indices.health = data.health;
+                
+                // 如果有任何数值，直接返回
+                if (indices.comprehensive || indices.love || indices.work || indices.money || indices.health) {
+                    return indices;
+                }
             }
             
             // 兼容旧格式（字符串）
@@ -965,19 +1003,20 @@
                 const lines = data.split('\n');
                 
                 lines.forEach(line => {
-                    if (line.includes('综合指数')) {
+                    // 匹配各种可能的格式
+                    if (line.includes('综合') && (line.includes('指数') || line.includes('分') || line.includes('运势'))) {
                         const match = line.match(/(\d+)/g);
                         if (match) indices.comprehensive = parseInt(match[match.length - 1]);
-                    } else if (line.includes('爱情指数')) {
+                    } else if (line.includes('爱情') && (line.includes('指数') || line.includes('分') || line.includes('运势'))) {
                         const match = line.match(/(\d+)/g);
                         if (match) indices.love = parseInt(match[match.length - 1]);
-                    } else if (line.includes('工作指数')) {
+                    } else if ((line.includes('工作') || line.includes('事业')) && (line.includes('指数') || line.includes('分') || line.includes('运势'))) {
                         const match = line.match(/(\d+)/g);
                         if (match) indices.work = parseInt(match[match.length - 1]);
-                    } else if (line.includes('财运指数')) {
+                    } else if ((line.includes('财运') || line.includes('财富')) && (line.includes('指数') || line.includes('分') || line.includes('运势'))) {
                         const match = line.match(/(\d+)/g);
                         if (match) indices.money = parseInt(match[match.length - 1]);
-                    } else if (line.includes('健康指数')) {
+                    } else if (line.includes('健康') && (line.includes('指数') || line.includes('分') || line.includes('运势'))) {
                         const match = line.match(/(\d+)/g);
                         if (match) indices.health = parseInt(match[match.length - 1]);
                     }
@@ -1093,15 +1132,21 @@
                 
                 if (data.date_info) {
                     if (data.date_info.lunar_formatted) {
-                        lunarDate = data.date_info.lunar_formatted;
+                        // 在农历日期前面加上年份信息
+                        const yearGanzhi = data.date_info.year_ganzhi || '';
+                        lunarDate = yearGanzhi ? `${yearGanzhi}年${data.date_info.lunar_formatted}` : data.date_info.lunar_formatted;
                     }
                 }
                 
-                if (data.festival_info) {
-                    if (data.festival_info.lunar_festival) {
-                        festivalInfo = data.festival_info.lunar_festival + ' ' + festivalInfo;
-                    } else if (data.festival_info.festival) {
-                        festivalInfo = data.festival_info.festival + ' ' + festivalInfo;
+                if (data.date_info) {
+                    if (data.date_info.lunar_festival) {
+                        festivalInfo = data.date_info.lunar_festival + ' ' + festivalInfo;
+                    }
+                    if (data.date_info.festival) {
+                        festivalInfo = data.date_info.festival + ' ' + festivalInfo;
+                    }
+                    if (data.date_info.jieqi) {
+                        festivalInfo = data.date_info.jieqi + ' ' + festivalInfo;
                     }
                 }
                 
@@ -1195,13 +1240,23 @@
                 }
                 
                 // 星宿
-                if (data.fortune_info && data.fortune_info.xingsu) {
-                    detailItems.push(`星宿：${data.fortune_info.xingsu}`);
+                if (data.xingsu_info && data.xingsu_info.xingsu) {
+                    detailItems.push(`星宿：${data.xingsu_info.xingsu}`);
                 }
                 
                 // 建除
                 if (data.fortune_info && data.fortune_info.jianshen) {
                     detailItems.push(`建除：${data.fortune_info.jianshen}`);
+                }
+                
+                // 生肖
+                if (data.date_info && data.date_info.zodiac) {
+                    detailItems.push(`生肖：${data.date_info.zodiac}`);
+                }
+                
+                // 月份名称
+                if (data.date_info && data.date_info.lmonthname) {
+                    detailItems.push(`月份：${data.date_info.lmonthname}`);
                 }
                 
                 if (detailItems.length > 0) {
@@ -1301,18 +1356,23 @@
             if (typeof data === 'object' && data.sign) {
                 let html = '<div class="constellation-info">';
                                 
-                // 今日概述
-                if (data.summary) {
-                    html += `<div class="constellation-summary">${data.summary}</div>`;
+                // 今日概述 - 支持新旧字段名
+                const summary = data.summary || data.overall_fortune || data.overall;
+                if (summary) {
+                    html += `<div class="constellation-summary">${summary}</div>`;
                 }
                 
-                // 幸运信息 - 参考老黄历详细信息样式
+                // 幸运信息 - 支持新旧字段名
                 const luckyItems = [];
                 if (data.lucky_info) {
                     if (data.lucky_info.color) luckyItems.push(`幸运颜色：${data.lucky_info.color}`);
                     if (data.lucky_info.number) luckyItems.push(`幸运数字：${data.lucky_info.number}`);
                     if (data.lucky_info.time) luckyItems.push(`幸运时间：${data.lucky_info.time}`);
                     if (data.lucky_info.noble_sign) luckyItems.push(`贵人星座：${data.lucky_info.noble_sign}`);
+                } else {
+                    if (data.lucky_color) luckyItems.push(`幸运颜色：${data.lucky_color}`);
+                    if (data.lucky_number) luckyItems.push(`幸运数字：${data.lucky_number}`);
+                    if (data.lucky_time) luckyItems.push(`幸运时间：${data.lucky_time}`);
                 }
                 
                 if (luckyItems.length > 0) {
@@ -1453,19 +1513,32 @@
         
         // 选择星座Tab
         function selectConstellation(sign) {
+            console.log(`selectConstellation被调用: ${sign}`);
+            
             // 更新tab状态
-            document.querySelectorAll('.tab-item').forEach(tab => {
+            const tabItems = document.querySelectorAll('.tab-item');
+            console.log(`找到${tabItems.length}个tab项`);
+            
+            tabItems.forEach(tab => {
                 tab.classList.remove('active');
             });
-            const selectedTab = document.querySelector(`[data-sign="${sign}"]`);
-            selectedTab.classList.add('active');
             
-            // 滚动到选中的tab
-            selectedTab.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'center'
-            });
+            const selectedTab = document.querySelector(`[data-sign="${sign}"]`);
+            console.log(`选中的tab元素:`, selectedTab);
+            
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                
+                // 滚动到选中的tab
+                selectedTab.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+            } else {
+                console.error(`未找到data-sign="${sign}"的tab元素`);
+                return; // 如果找不到tab元素，直接返回
+            }
             
             // 加载星座运势
             loadConstellation(sign);
@@ -1549,6 +1622,8 @@
              const content = document.getElementById('constellation-content');
              const chartContainer = document.getElementById('chart-container');
              
+             console.log(`开始加载星座运势: ${constellation}`);
+             
              if (!constellation) {
                  content.innerHTML = '<div class="loading">请选择星座查看运势</div>';
                  chartContainer.style.display = 'none';
@@ -1558,7 +1633,7 @@
              // 检查缓存
              const cachedData = constellationCache.get(constellation);
              if (cachedData) {
-                 console.log(`使用缓存的${constellation}星座运势数据`);
+                 console.log(`使用缓存的${constellation}星座运势数据:`, cachedData);
                  chartContainer.style.display = 'block';
                  createConstellationChart(cachedData);
                  content.innerHTML = formatConstellationData(cachedData);
@@ -1569,8 +1644,11 @@
              chartContainer.style.display = 'none';
              
              try {
+                 console.log(`开始请求星座API: /api/constellation?sign=${constellation}`);
                  const response = await fetch(`/api/constellation?sign=${constellation}`);
+                 console.log(`星座API响应状态: ${response.status} ${response.statusText}`);
                  const data = await response.json();
+                 console.log(`星座API返回数据:`, data);
                  
                  if (data.success) {
                      // 缓存数据

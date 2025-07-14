@@ -8,13 +8,27 @@ interface Env {
 interface ConstellationData {
   sign: string;
   date: string;
-  overall: string;
-  love: string;
-  career: string;
-  wealth: string;
-  health: string;
+  overall_fortune: string;
+  love_fortune: string;
+  career_fortune: string;
+  wealth_fortune: string;
+  health_fortune: string;
   lucky_number: number;
   lucky_color: string;
+  // 添加运势指数
+  indices?: {
+    comprehensive: number;
+    love: number;
+    work: number;
+    money: number;
+    health: number;
+  };
+  // 兼容字段
+  comprehensive?: number;
+  love?: number;
+  work?: number;
+  money?: number;
+  health?: number;
 }
 
 // 缓存管理
@@ -60,64 +74,23 @@ const constellationMap: { [key: string]: string } = {
   '双鱼座': 'pisces'
 };
 
-// 获取备用星座数据
-function getFallbackConstellationData(sign: string): ConstellationData {
-  const today = new Date().toISOString().split('T')[0];
-  
-  const overallFortunes = [
-    '今日运势不错，适合积极行动，把握机会',
-    '运势平稳，保持平常心，稳步前进',
-    '今日能量充沛，适合挑战新事物',
-    '运势略有波动，建议谨慎行事',
-    '今日运势上升，适合做重要决定'
-  ];
-  
-  const loveFortunes = [
-    '感情运势良好，单身者有机会遇到心仪对象',
-    '恋爱运势平稳，适合与伴侣深入交流',
-    '桃花运旺盛，注意把握缘分',
-    '感情需要耐心经营，避免冲动',
-    '爱情运势上升，适合表达心意'
-  ];
-  
-  const careerFortunes = [
-    '工作运势良好，适合推进重要项目',
-    '事业发展平稳，保持专注和努力',
-    '职场表现出色，容易获得认可',
-    '工作中可能遇到挑战，需要冷静应对',
-    '事业运势上升，适合展示才能'
-  ];
-  
-  const wealthFortunes = [
-    '财运一般，建议理性消费',
-    '偏财运不错，可适当投资',
-    '财运平稳，适合储蓄理财',
-    '投资需谨慎，避免冲动决定',
-    '财运上升，有意外收获的可能'
-  ];
-  
-  const healthFortunes = [
-    '身体状况良好，注意适当休息',
-    '健康运势平稳，保持规律作息',
-    '精力充沛，适合运动锻炼',
-    '注意身体信号，避免过度劳累',
-    '健康运势上升，心情愉悦'
-  ];
-  
-  const colors = ['红色', '蓝色', '绿色', '黄色', '紫色', '橙色', '粉色', '白色'];
-  
-  return {
-    sign,
-    date: today,
-    overall: overallFortunes[Math.floor(Math.random() * overallFortunes.length)],
-    love: loveFortunes[Math.floor(Math.random() * loveFortunes.length)],
-    career: careerFortunes[Math.floor(Math.random() * careerFortunes.length)],
-    wealth: wealthFortunes[Math.floor(Math.random() * wealthFortunes.length)],
-    health: healthFortunes[Math.floor(Math.random() * healthFortunes.length)],
-    lucky_number: Math.floor(Math.random() * 100) + 1,
-    lucky_color: colors[Math.floor(Math.random() * colors.length)]
-  };
-}
+// 英文到中文星座名称映射
+const englishToChineseMap: { [key: string]: string } = {
+  'aries': '白羊座',
+  'taurus': '金牛座',
+  'gemini': '双子座',
+  'cancer': '巨蟹座',
+  'leo': '狮子座',
+  'virgo': '处女座',
+  'libra': '天秤座',
+  'scorpio': '天蝎座',
+  'sagittarius': '射手座',
+  'capricorn': '摩羯座',
+  'aquarius': '水瓶座',
+  'pisces': '双鱼座'
+};
+
+
 
 // 处理CORS
 function corsHeaders() {
@@ -140,9 +113,13 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
   }
   
   try {
-    const sign = url.searchParams.get('sign') || '白羊座';
+    const inputSign = url.searchParams.get('sign') || 'aries';
+    // 转换为中文星座名称
+    const sign = englishToChineseMap[inputSign] || inputSign;
     const today = new Date().toISOString().split('T')[0];
     const cacheKey = `constellation_${sign}_${today}`;
+    
+    console.log(`星座运势请求: ${inputSign} -> ${sign}`);
     
     // 检查缓存
     let constellationData = cache.get(cacheKey);
@@ -160,19 +137,89 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
           
           if (response.ok) {
             const data = await response.json() as any;
-            if (data.code === 200 && data.result) {
-              const result = data.result;
-              constellationData = {
-                sign,
-                date: today,
-                overall: result.comprehensive || '',
-                love: result.love || '',
-                career: result.career || '',
-                wealth: result.wealth || '',
-                health: result.health || '',
-                lucky_number: parseInt(result.number) || Math.floor(Math.random() * 100) + 1,
-                lucky_color: result.color || '蓝色'
+            if (data.code === 200 && data.result && data.result.list) {
+              const list = data.result.list;
+              // 解析天行API返回的list格式数据
+              const getContentByType = (type: string) => {
+                const item = list.find((item: any) => item.type && item.type.includes(type));
+                return item ? item.content : '';
               };
+              
+              // 提取运势指数（从内容中解析数字）
+              const extractScore = (content: string): number => {
+                if (!content) return Math.floor(Math.random() * 40) + 60;
+                
+                // 查找指数相关的数字，优先匹配百分制数字
+                const percentMatch = content.match(/([1-9]\d?)%/);
+                if (percentMatch) {
+                  return parseInt(percentMatch[1]);
+                }
+                
+                // 查找分数形式，如"85分"
+                const scoreMatch = content.match(/(\d+)分/);
+                if (scoreMatch) {
+                  return parseInt(scoreMatch[1]);
+                }
+                
+                // 查找星级评分，转换为分数
+                const starMatch = content.match(/(\d+)星/);
+                if (starMatch) {
+                  return parseInt(starMatch[1]) * 20; // 5星制转100分制
+                }
+                
+                // 查找任意数字，取合理范围内的
+                const numbers = content.match(/\d+/g);
+                if (numbers) {
+                  for (const num of numbers) {
+                    const score = parseInt(num);
+                    if (score >= 50 && score <= 100) {
+                      return score;
+                    }
+                  }
+                }
+                
+                // 如果没有找到合适的数字，返回随机值
+                return Math.floor(Math.random() * 40) + 60;
+              };
+              
+              const comprehensiveScore = extractScore(getContentByType('综合指数') || getContentByType('今日概述'));
+              const loveScore = extractScore(getContentByType('爱情指数'));
+              const workScore = extractScore(getContentByType('工作指数') || getContentByType('事业指数'));
+              const moneyScore = extractScore(getContentByType('财运指数'));
+              const healthScore = extractScore(getContentByType('健康指数'));
+              
+              constellationData = {
+                sign: inputSign, // 返回原始输入的英文名称
+                date: today,
+                overall_fortune: getContentByType('今日概述') || getContentByType('综合'),
+                love_fortune: getContentByType('爱情指数'),
+                career_fortune: getContentByType('工作指数') || getContentByType('事业指数'),
+                wealth_fortune: getContentByType('财运指数'),
+                health_fortune: getContentByType('健康指数'),
+                lucky_number: parseInt(getContentByType('幸运数字')) || Math.floor(Math.random() * 100) + 1,
+                lucky_color: getContentByType('幸运颜色') || '蓝色',
+                // 幸运信息结构
+                lucky_info: {
+                  color: getContentByType('幸运颜色') || '蓝色',
+                  number: getContentByType('幸运数字') || String(Math.floor(Math.random() * 100) + 1),
+                  noble_sign: getContentByType('贵人星座') || ''
+                },
+                // 运势指数
+                indices: {
+                  comprehensive: comprehensiveScore,
+                  love: loveScore,
+                  work: workScore,
+                  money: moneyScore,
+                  health: healthScore
+                },
+                // 兼容字段
+                comprehensive: comprehensiveScore,
+                love: loveScore,
+                work: workScore,
+                money: moneyScore,
+                health: healthScore
+              };
+              console.log('成功解析天行星座API数据:', constellationData);
             }
           }
         } catch (error) {
@@ -180,9 +227,25 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         }
       }
       
-      // 如果API调用失败，使用备用数据
+      // 如果没有配置API key或API调用失败，返回错误
       if (!constellationData) {
-        constellationData = getFallbackConstellationData(sign);
+        if (!env.TIANAPI_KEY) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: '未配置天行数据API密钥，请联系管理员配置TIANAPI_KEY环境变量'
+          }), {
+            status: 400,
+            headers: corsHeaders()
+          });
+        } else {
+          return new Response(JSON.stringify({
+            success: false,
+            error: '天行数据API调用失败，请稍后重试'
+          }), {
+            status: 500,
+            headers: corsHeaders()
+          });
+        }
       }
       
       // 缓存数据

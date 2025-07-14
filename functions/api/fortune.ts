@@ -14,6 +14,12 @@ interface FortuneData {
     month_ganzhi: string;
     day_ganzhi: string;
     zodiac: string;
+    lunar_festival: string;
+    festival: string;
+    lmonthname: string;
+    lubarmonth: string;
+    lunarday: string;
+    jieqi: string;
   };
   fortune_info: {
     fitness: string;
@@ -21,10 +27,17 @@ interface FortuneData {
     shenwei: string;
     taishen: string;
     chongsha: string;
+    suisha: string;
+    pengzu: string;
+    jianshen: string;
   };
-  festival_info: {
-    festival: string;
-    holiday: string;
+  wuxing_info: {
+    wuxingjiazi: string;
+    wuxingnayear: string;
+    wuxingnamonth: string;
+  };
+  xingsu_info: {
+    xingsu: string;
   };
 }
 
@@ -67,60 +80,7 @@ class SimpleCache {
 
 const cache = new SimpleCache();
 
-// 获取备用运势数据
-function getFallbackFortuneData(): FortuneData {
-  const today = new Date().toISOString().split('T')[0];
-  
-  const fitnessOptions = [
-    '祈福、出行、会友', '学习、读书、思考', '整理、清洁、收纳',
-    '运动、健身、散步', '烹饪、品茶、休息', '创作、写作、绘画'
-  ];
-  
-  const tabooOptions = [
-    '加班、熬夜、争吵', '暴饮暴食、冲动消费', '拖延、抱怨、负能量',
-    '过度使用电子设备', '忽视健康、不运动', '说话不经大脑'
-  ];
-  
-  return {
-    date_info: {
-      gregorian_date: today,
-      lunar_date: '农历信息获取中...',
-      lunar_formatted: '农历信息获取中...',
-      year_ganzhi: '甲子',
-      month_ganzhi: '丙寅',
-      day_ganzhi: '戊辰',
-      zodiac: '龙'
-    },
-    fortune_info: {
-      fitness: fitnessOptions[Math.floor(Math.random() * fitnessOptions.length)],
-      taboo: tabooOptions[Math.floor(Math.random() * tabooOptions.length)],
-      shenwei: '东北',
-      taishen: '房床厕外东南',
-      chongsha: '冲狗(壬戌)煞南'
-    },
-    festival_info: {
-      festival: '',
-      holiday: ''
-    }
-  };
-}
 
-// 获取备用星座数据
-function getFallbackConstellationData(sign: string): ConstellationData {
-  const today = new Date().toISOString().split('T')[0];
-  
-  return {
-    sign,
-    date: today,
-    overall: '今日运势不错，适合积极行动',
-    love: '感情运势平稳，单身者有机会遇到心仪对象',
-    career: '工作运势良好，适合推进重要项目',
-    wealth: '财运一般，建议理性消费',
-    health: '身体状况良好，注意适当休息',
-    lucky_number: Math.floor(Math.random() * 100) + 1,
-    lucky_color: ['红色', '蓝色', '绿色', '黄色', '紫色'][Math.floor(Math.random() * 5)]
-  };
-}
 
 // 处理CORS
 function corsHeaders() {
@@ -167,28 +127,47 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
             console.log('API Response data:', data.code, data.msg || 'Success');
             if (data.code === 200 && data.result) {
               const result = data.result;
+              // 天行数据API字段映射 - 根据实际API响应调整
+              const lunarFormatted = result.lubarmonth && result.lunarday ? 
+                                   `${result.lubarmonth}${result.lunarday}` : 
+                                   (result.lunardate || '农历信息获取中...');
+              
               fortuneData = {
                 date_info: {
-                  gregorian_date: today,
-                  lunar_date: result.lunar_date || '',
-                  lunar_formatted: result.lunar_date_cn || '农历信息获取中...',
-                  year_ganzhi: result.year_ganzhi || '',
-                  month_ganzhi: result.month_ganzhi || '',
-                  day_ganzhi: result.day_ganzhi || '',
-                  zodiac: result.zodiac || ''
+                  gregorian_date: result.gregoriandate || today,
+                  lunar_date: result.lunardate || '',
+                  lunar_formatted: lunarFormatted,
+                  year_ganzhi: result.tiangandizhiyear || '',
+                  month_ganzhi: result.tiangandizhimonth || '',
+                  day_ganzhi: result.tiangandizhiday || '',
+                  zodiac: result.shengxiao || '',
+                  lunar_festival: result.lunar_festival || '',
+                  festival: result.festival || '',
+                  lmonthname: result.lmonthname || '',
+                  lubarmonth: result.lubarmonth || '',
+                  lunarday: result.lunarday || '',
+                  jieqi: result.jieqi || ''
                 },
                 fortune_info: {
                   fitness: result.fitness || '',
                   taboo: result.taboo || '',
                   shenwei: result.shenwei || '',
                   taishen: result.taishen || '',
-                  chongsha: result.chongsha || ''
+                  chongsha: result.chongsha || '',
+                  suisha: result.suisha || '',
+                  pengzu: result.pengzu || '',
+                  jianshen: result.jianshen || ''
                 },
-                festival_info: {
-                  festival: result.festival || '',
-                  holiday: result.holiday || ''
+                wuxing_info: {
+                  wuxingjiazi: result.wuxingjiazi || '',
+                  wuxingnayear: result.wuxingnayear || '',
+                  wuxingnamonth: result.wuxingnamonth || ''
+                },
+                xingsu_info: {
+                  xingsu: result.xingsu || ''
                 }
               };
+              console.log('成功解析天行API数据:', fortuneData);
             }
           }
         } catch (error) {
@@ -198,9 +177,25 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         console.log('使用兜底数据：未配置TIANAPI_KEY环境变量');
       }
       
-      // 如果API调用失败，使用备用数据
+      // 如果没有配置API key或API调用失败，返回错误
       if (!fortuneData) {
-        fortuneData = getFallbackFortuneData();
+        if (!env.TIANAPI_KEY) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: '未配置天行数据API密钥，请联系管理员配置TIANAPI_KEY环境变量'
+          }), {
+            status: 400,
+            headers: corsHeaders()
+          });
+        } else {
+          return new Response(JSON.stringify({
+            success: false,
+            error: '天行数据API调用失败，请稍后重试'
+          }), {
+            status: 500,
+            headers: corsHeaders()
+          });
+        }
       }
       
       // 缓存数据
