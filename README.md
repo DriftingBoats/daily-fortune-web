@@ -39,7 +39,19 @@ GET /api/info
 
 ## 🚀 快速部署
 
-### Cloudflare Pages 部署
+### 一键部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/DriftingBoats/daily-fortune-web)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/DriftingBoats/daily-fortune-web)
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/python?referralCode=alphasec)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/DriftingBoats/daily-fortune-web)
+
+### 手动部署
+
+#### Cloudflare Pages 部署
 
 1. Fork 或下载此项目到你的 GitHub 仓库
 2. 登录 [Cloudflare Pages](https://pages.cloudflare.com/)
@@ -54,7 +66,7 @@ GET /api/info
    - `TIANAPI_KEY`: 天行数据API密钥
 7. 点击「保存并部署」
 
-### Vercel 部署
+#### Vercel 部署
 
 1. Fork 或下载此项目到你的 GitHub 仓库
 2. 登录 [Vercel](https://vercel.com/)
