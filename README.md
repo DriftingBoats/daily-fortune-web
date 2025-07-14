@@ -5,11 +5,13 @@
 ## ✨ 功能特点
 
 - 📅 **老黄历查询** - 获取详细的农历信息和宜忌事项
+- ⭐ **星座运势** - 提供12星座的每日运势查询
 - 🎨 **现代化界面** - 响应式设计，支持移动端
 - 🚀 **快速部署** - 支持 Cloudflare Pages 和 Vercel 一键部署
 - 📡 **RESTful API** - 提供完整的 API 接口
 - 💾 **智能缓存** - 减少 API 调用，提升响应速度
 - 🔄 **自动降级** - API 失败时提供备用内容
+- 🛠️ **TypeScript 后端** - 原生支持 Cloudflare Pages，性能更优
 
 ## 🖥️ 在线演示
 
@@ -32,10 +34,29 @@ GET /api/fortune/today
 GET /api/fortune/simple
 ```
 
+### 获取星座运势
+```
+GET /api/constellation?sign=白羊座
+```
+
 ### 获取API信息
 ```
 GET /api/info
 ```
+
+## 🔧 问题解决
+
+### Cloudflare Pages 部署错误修复
+
+如果你之前遇到 "网络错误，请稍后重试 错误详情: Unexpected token '<'" 的问题，这是因为 Cloudflare Pages 不支持 Python Flask 后端。
+
+**解决方案**: 本项目现已升级为 TypeScript 后端，使用 Cloudflare Pages Functions，完美解决部署问题：
+
+- ✅ 原生支持 Cloudflare Pages
+- ✅ 无需 Python 环境
+- ✅ 更快的冷启动时间
+- ✅ 更好的性能表现
+- ✅ 完整的 CORS 支持
 
 ## 🚀 快速部署
 
@@ -59,12 +80,14 @@ GET /api/info
 4. 选择你的仓库
 5. 配置构建设置：
    - **框架预设**: `None`
-   - **构建命令**: `pip install -r requirements.txt`
+   - **构建命令**: `npm install && npm run build`
    - **构建输出目录**: `/`
    - **根目录**: `/`
 6. 在环境变量中添加（可选）：
    - `TIANAPI_KEY`: 天行数据API密钥
 7. 点击「保存并部署」
+
+**注意**: Cloudflare Pages 现在使用 TypeScript Functions，无需 Python 环境，解决了之前的部署问题。
 
 #### Vercel 部署
 
@@ -89,21 +112,26 @@ cd fortune-app
 
 2. 安装依赖：
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
-3. 配置环境变量（可选）：
+3. 构建 TypeScript：
+```bash
+npm run build
+```
+
+4. 配置环境变量（可选）：
 ```bash
 cp .env.example .env
 # 编辑 .env 文件，添加你的 API 密钥
 ```
 
-4. 运行应用：
+5. 使用 Wrangler 本地开发：
 ```bash
-python app.py
+npx wrangler pages dev .
 ```
 
-5. 访问 `http://localhost:5000`
+6. 访问 `http://localhost:8788`
 
 ## ⚙️ 配置说明
 
@@ -122,11 +150,18 @@ python app.py
 
 ```
 fortune-app/
-├── app.py              # 主应用文件
-├── templates/
-│   └── index.html      # 前端页面模板
-├── requirements.txt    # Python依赖
+├── functions/
+│   └── api/
+│       ├── fortune.ts      # 老黄历API (TypeScript)
+│       ├── constellation.ts # 星座运势API (TypeScript)
+│       └── index.ts        # API入口文件
+├── index.html          # 前端页面
+├── package.json        # Node.js依赖
+├── tsconfig.json       # TypeScript配置
+├── wrangler.toml       # Cloudflare配置
 ├── .env.example       # 环境变量示例
+├── API_SETUP.md       # API配置说明
+├── MIGRATION.md       # 迁移指南
 ├── README.md          # 项目说明
 └── vercel.json        # Vercel配置文件
 ```
@@ -144,10 +179,11 @@ fortune-app/
 
 ## 🔧 技术栈
 
-- **后端**: Python Flask
-- **前端**: HTML5 + CSS3 + JavaScript
+- **后端**: TypeScript (Cloudflare Pages Functions)
+- **前端**: HTML5 + CSS3 + JavaScript  
 - **API**: 天行数据老黄历API
 - **部署**: Cloudflare Pages / Vercel
+- **开发工具**: Wrangler CLI, npm
 
 ## 📄 许可证
 

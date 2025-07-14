@@ -1,0 +1,27 @@
+{
+  "name": "daily-fortune-web",
+  "version": "1.0.0",
+  "description": "今日运势 - 老黄历与星座运势查询",
+  "main": "index.html",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "fortune",
+    "almanac",
+    "constellation",
+    "chinese-calendar"
+  ],
+  "author": "Wang Mingming",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "typescript": "^5.3.0",
+    "wrangler": "^4.24.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

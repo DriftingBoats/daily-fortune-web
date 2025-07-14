@@ -103,3 +103,20 @@ node_modules/
 
 # DynamoDB Local files
 .dynamodb/
+
+# TypeScript
+*.tsbuildinfo
+dist/
+
+# Cloudflare
+.wrangler/
+wrangler.toml.bak
+
+# Build outputs
+build/
+out/
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
