@@ -66,6 +66,7 @@
             margin-bottom: 30px;
             box-shadow: var(--shadow-lg);
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -102,6 +103,30 @@
             transform: translateY(-2px);
         }
         
+        .github-link {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .github-link:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) {
+            .github-link {
+                top: 15px;
+                right: 15px;
+                font-size: 1.3rem;
+            }
+        }
+        
         .grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -129,6 +154,7 @@
             border: 1px solid var(--border-color);
             width: 100%;
             box-sizing: border-box;
+            position: relative;
         }
         
         .card-header {
@@ -702,6 +728,10 @@
 <body>
     <div class="container">
         <div class="header">
+            <!-- GitHub链接 -->
+            <a href="https://github.com/DriftingBoats/daily-fortune-web" target="_blank" class="github-link" title="查看GitHub仓库">
+                <i class="fab fa-github"></i>
+            </a>
             <h1>今日运势</h1>
             <p class="current-date" id="current-date"></p>
             <p class="subtitle" id="hitokoto-text" onclick="loadHitokoto()" title="点击刷新一言">每日一言</p>
