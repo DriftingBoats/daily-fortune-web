@@ -919,35 +919,95 @@
             hitokotoElement.textContent = '加载中...';
             hitokotoElement.style.opacity = '0.6';
             
-            fetch('https://v1.hitokoto.cn/')
-                .then(response => {
-                    console.log('一言API响应状态:', response.status);
+            // 尝试多个API地址，提高成功率
+            const apiUrls = [
+                'https://v1.hitokoto.cn/',
+                'https://api.hitokoto.cn/',
+                'https://sslapi.hitokoto.cn/',
+                'https://international.v1.hitokoto.cn/'
+            ];
+            
+            async function tryFetchHitokoto(urls, index = 0) {
+                if (index >= urls.length) {
+                    throw new Error('所有API地址都无法访问');
+                }
+                
+                try {
+                    console.log(`尝试API地址 ${index + 1}/${urls.length}:`, urls[index]);
+                    
+                    // 创建一个带超时的fetch请求
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+                    
+                    const response = await fetch(urls[index], {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                        },
+                        signal: controller.signal,
+                        mode: 'cors'
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    console.log(`API地址 ${index + 1} 响应状态:`, response.status, response.statusText);
+                    
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('一言API返回数据:', data);
-                    if (data && data.hitokoto) {
-                        hitokotoElement.textContent = data.hitokoto;
+                    
+                    const data = await response.json();
+                    console.log(`API地址 ${index + 1} 返回数据:`, data);
+                    
+                    if (data && (data.hitokoto || data.content)) {
+                        const content = data.hitokoto || data.content;
+                        hitokotoElement.textContent = content;
                         
                         // 如果有来源信息，可以添加到title属性中
                         let titleText = '点击刷新一言';
                         if (data.from) {
                             titleText += ` | 来源：${data.from}`;
                         }
-                        if (data.from_who) {
-                            titleText += ` | 作者：${data.from_who}`;
+                        if (data.from_who || data.author) {
+                            titleText += ` | 作者：${data.from_who || data.author}`;
                         }
                         hitokotoElement.title = titleText;
+                        
+                        console.log('一言加载成功:', content);
+                        return; // 成功获取，退出函数
+                    } else {
+                        throw new Error('返回数据格式错误或内容为空');
                     }
-                })
+                } catch (error) {
+                    console.error(`API地址 ${index + 1} 失败:`, error.message);
+                    
+                    // 如果是最后一个API，抛出错误
+                    if (index === urls.length - 1) {
+                        throw error;
+                    }
+                    
+                    // 尝试下一个API地址
+                    return tryFetchHitokoto(urls, index + 1);
+                }
+            }
+            
+            tryFetchHitokoto(apiUrls)
                 .catch(error => {
-                    console.error('加载一言失败:', error);
-                    // 恢复原始文本或显示默认文本
-                    hitokotoElement.textContent = originalText === '加载中...' ? '每日一言' : originalText;
-                    hitokotoElement.title = '点击刷新一言 | 加载失败，请重试';
+                    console.error('所有一言API都加载失败:', error.message);
+                    
+                    // 显示备用内容
+                    const fallbackTexts = [
+                        '今日宜：保持乐观，忌：过度焦虑',
+                        '愿你的每一天都充满阳光',
+                        '生活不止眼前的苟且，还有诗和远方',
+                        '每一个不曾起舞的日子，都是对生命的辜负',
+                        '山重水复疑无路，柳暗花明又一村'
+                    ];
+                    
+                    const randomText = fallbackTexts[Math.floor(Math.random() * fallbackTexts.length)];
+                    hitokotoElement.textContent = randomText;
+                    hitokotoElement.title = '点击刷新一言 | 网络异常，显示备用内容';
                 })
                 .finally(() => {
                     // 恢复透明度
