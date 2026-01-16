@@ -1,8 +1,4 @@
-import { fetchConstellation } from '../../shared/constellation-service';
-
-interface Env {
-  TIANAPI_KEY?: string;
-}
+import { fetchConstellation } from '../shared/constellation-service';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,17 +7,19 @@ const corsHeaders = {
   'Content-Type': 'application/json'
 };
 
-export async function onRequestGet(context: { request: Request; env: Env }) {
-  const { request, env } = context;
+export const config = {
+  runtime: 'edge'
+};
 
-  if (request.method === 'OPTIONS') {
+export default async function handler(req: Request) {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const url = new URL(request.url);
+  const url = new URL(req.url);
   const sign = url.searchParams.get('sign') || 'aries';
-  const apiKey = env.TIANAPI_KEY || '';
-
+  const apiKey = process.env.TIANAPI_KEY || '';
+  
   const result = await fetchConstellation(apiKey, sign);
 
   return new Response(JSON.stringify(result), {

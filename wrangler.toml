@@ -1,3 +1,9 @@
-name = "daily-fortune-web"
-compatibility_date = "2023-12-01"
+name = "fortune-app"
+compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[site]
+bucket = "./dist"

@@ -1,12 +1,14 @@
 {
-  "name": "daily-fortune-web",
-  "version": "1.0.0",
-  "description": "今日运势 - 老黄历与星座运势查询",
-  "main": "index.html",
+  "name": "fortune-app",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "每日运势 - 老黄历与星座运势查询",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "type-check": "tsc --noEmit"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "cf:dev": "wrangler pages dev dist --compatibility-date=2024-01-01",
+    "cf:deploy": "npm run build && wrangler pages deploy dist"
   },
   "keywords": [
     "fortune",
@@ -16,10 +18,24 @@
   ],
   "author": "Wang Mingming",
   "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
-    "typescript": "^5.3.0",
-    "wrangler": "^4.24.3"
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.2",
+    "wrangler": "^3.28.0"
   },
   "engines": {
     "node": ">=18.0.0"

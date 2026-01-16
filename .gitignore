@@ -111,6 +111,7 @@ dist/
 # Cloudflare
 .wrangler/
 wrangler.toml.bak
+.dev.vars
 
 # Build outputs
 build/
@@ -120,3 +121,17 @@ out/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# AI Assistant Skills (UI UX Pro Max)
+.agent/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.github/
+.kiro/
+.opencode/
+.roo/
+.shared/
+.trae/
+.windsurf/

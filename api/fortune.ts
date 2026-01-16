@@ -1,8 +1,4 @@
-import { fetchFortune } from '../../shared/fortune-service';
-
-interface Env {
-  TIANAPI_KEY?: string;
-}
+import { fetchFortune } from '../shared/fortune-service';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,14 +7,16 @@ const corsHeaders = {
   'Content-Type': 'application/json'
 };
 
-export async function onRequestGet(context: { request: Request; env: Env }) {
-  const { request, env } = context;
+export const config = {
+  runtime: 'edge'
+};
 
-  if (request.method === 'OPTIONS') {
+export default async function handler(req: Request) {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const apiKey = env.TIANAPI_KEY || '';
+  const apiKey = process.env.TIANAPI_KEY || '';
   const result = await fetchFortune(apiKey);
 
   return new Response(JSON.stringify(result), {
