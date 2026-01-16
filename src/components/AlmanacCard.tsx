@@ -102,7 +102,7 @@ export default function AlmanacCard({ data, loading, error }: Props) {
 
 function CardWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-fortune-border">
+    <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/30">
       <div className="flex items-center mb-5 pb-3 border-b border-fortune-border">
         <div className="w-8 h-8 flex items-center justify-center bg-amber-100 rounded-lg mr-3">
           <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">

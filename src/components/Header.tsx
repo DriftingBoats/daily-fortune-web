@@ -15,13 +15,13 @@ export default function Header() {
   const { data: hitokoto, loading, refresh } = useHitokoto()
 
   return (
-    <header className="bg-white rounded-2xl p-8 shadow-sm border border-fortune-border text-center relative">
+    <header className="bg-white/70 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/30 text-center relative">
       {/* GitHub 链接 */}
       <a
         href="https://github.com/DriftingBoats/daily-fortune-web"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-fortune-light rounded-lg transition-colors"
+        className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-white/50 rounded-lg transition-colors"
         title="查看 GitHub 仓库"
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export default function Header() {
       {/* 一言 */}
       <p
         onClick={refresh}
-        className="text-sm text-text-muted mt-3 py-2 px-4 bg-fortune-light rounded-lg cursor-pointer hover:text-primary hover:bg-amber-100 transition-colors inline-block max-w-fit mx-auto"
+        className="text-sm text-text-muted mt-3 py-2 px-4 bg-white/50 backdrop-blur rounded-lg cursor-pointer hover:text-primary hover:bg-white/70 transition-colors inline-block max-w-fit mx-auto"
         title="点击刷新一言"
       >
         {loading ? '加载中...' : hitokoto?.hitokoto || '每日一言'}

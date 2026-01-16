@@ -17,7 +17,7 @@ const SIGNS = [
 
 export default function ConstellationCard({ data, loading, error, selectedSign, onSignChange }: Props) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-fortune-border">
+    <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/30">
       {/* 头部 */}
       <div className="flex items-center mb-5 pb-3 border-b border-fortune-border">
         <div className="w-8 h-8 flex items-center justify-center bg-amber-100 rounded-lg mr-3">
@@ -38,7 +38,7 @@ export default function ConstellationCard({ data, loading, error, selectedSign, 
               className={`flex-shrink-0 min-w-[72px] py-2 px-2 rounded-lg text-center border transition-colors ${
                 selectedSign === sign
                   ? 'bg-primary border-primary text-white'
-                  : 'bg-white border-fortune-border text-text-primary hover:bg-fortune-light hover:border-primary-light'
+                  : 'bg-white/50 backdrop-blur border-white/30 text-text-primary hover:bg-white/70 hover:border-primary/50'
               }`}
             >
               <div className="text-xs font-semibold">{ENGLISH_TO_CHINESE_MAP[sign]}</div>
@@ -63,7 +63,7 @@ export default function ConstellationCard({ data, loading, error, selectedSign, 
           {/* 运势详情 */}
           <div className="mt-4 space-y-3">
             {data.overall_fortune && (
-              <div className="bg-fortune-light p-4 rounded-lg border-l-4 border-primary">
+              <div className="bg-white/50 backdrop-blur p-4 rounded-lg border-l-4 border-primary">
                 <p className="text-sm text-text-primary leading-relaxed">{data.overall_fortune}</p>
               </div>
             )}
@@ -84,7 +84,7 @@ export default function ConstellationCard({ data, loading, error, selectedSign, 
 
 function LuckyTag({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col bg-white border border-fortune-border rounded-lg px-4 py-2 min-w-[80px]">
+    <div className="flex flex-col bg-white/50 backdrop-blur border border-white/30 rounded-lg px-4 py-2 min-w-[80px]">
       <span className="text-[10px] text-text-muted">{label}</span>
       <span className="text-sm font-semibold text-primary">{value}</span>
     </div>

@@ -31,3 +31,12 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* 毛玻璃效果 */
+.glass {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-black/20 backdrop-blur-xl border border-white/10;
+}

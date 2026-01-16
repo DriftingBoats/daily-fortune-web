@@ -11,7 +11,7 @@ function App() {
   const { data: constellationData, loading: constellationLoading, error: constellationError } = useConstellation(selectedSign)
 
   return (
-    <div className="min-h-screen bg-fortune-bg">
+    <div className="min-h-screen bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-50">
       <div className="max-w-5xl mx-auto px-4 py-8 md:px-6">
         <Header />
         
