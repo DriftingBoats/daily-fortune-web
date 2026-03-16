@@ -30,7 +30,7 @@ export default function FortuneChart({ indices }: Props) {
     indices.money,
     indices.health
   ]
-  const colors = ['#B45309', '#CA8A04', '#65A30D', '#EA580C', '#A16207']
+  const colors = ['#b85c38', '#d17650', '#5a6e5c', '#8d4226', '#4a7c59']
 
   const data = {
     labels,
@@ -104,7 +104,7 @@ export default function FortuneChart({ indices }: Props) {
   }
 
   return (
-    <div className="bg-fortune-light rounded-lg p-4 h-[200px]">
+    <div className="h-[200px]">
       <Bar data={data} options={options} />
     </div>
   )

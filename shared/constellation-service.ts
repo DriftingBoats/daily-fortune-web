@@ -101,6 +101,7 @@ export async function fetchConstellation(
       health_fortune: getContentByType('健康指数'),
       lucky_number: parseInt(getContentByType('幸运数字')) || Math.floor(Math.random() * 100) + 1,
       lucky_color: getContentByType('幸运颜色') || '蓝色',
+      lucky_constellation: getContentByType('贵人星座') || getContentByType('幸运星座') || '',
       indices: {
         comprehensive: comprehensiveScore,
         love: loveScore,

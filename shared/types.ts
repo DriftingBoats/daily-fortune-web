@@ -18,6 +18,10 @@ export interface FortuneData {
     shenwei?: string;
     taishen?: string;
     chongsha?: string;
+    pengzu?: string;
+    wuxing?: string;
+    jianshen?: string;
+    xingsu?: string;
   };
 }
 
@@ -32,6 +36,7 @@ export interface ConstellationData {
   health_fortune: string;
   lucky_number: number;
   lucky_color: string;
+  lucky_constellation: string;
   indices: {
     comprehensive: number;
     love: number;

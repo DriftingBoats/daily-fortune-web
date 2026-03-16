@@ -65,7 +65,11 @@ export async function fetchFortune(apiKey: string): Promise<ApiResponse<FortuneD
         taboo: result.taboo || '',
         shenwei: result.shenwei || '',
         taishen: result.taishen || '',
-        chongsha: result.chongsha || ''
+        chongsha: result.chongsha || '',
+        pengzu: result.pengzu || '',
+        wuxing: result.wuxingnaday || result.wuxing || '',
+        jianshen: result.jianshen || '',
+        xingsu: result.xingsu || ''
       }
     };
 

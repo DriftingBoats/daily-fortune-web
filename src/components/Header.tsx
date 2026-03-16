@@ -14,6 +14,8 @@ function formatDate(): string {
 export default function Header() {
   const { data: hitokoto, loading, refresh } = useHitokoto()
 
+  const source = [hitokoto?.from_who, hitokoto?.from].filter(Boolean).join(' / ')
+
   return (
     <header className="bg-white/70 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/30 text-center relative">
       {/* GitHub 链接 */}
@@ -31,15 +33,24 @@ export default function Header() {
 
       <h1 className="text-2xl font-semibold text-text-primary mb-1">今日运势</h1>
       <p className="text-sm text-text-secondary my-1.5">{formatDate()}</p>
-      
+
       {/* 一言 */}
-      <p
+      <div
         onClick={refresh}
         className="text-sm text-text-muted mt-3 py-2 px-4 bg-white/50 backdrop-blur rounded-lg cursor-pointer hover:text-primary hover:bg-white/70 transition-colors inline-block max-w-fit mx-auto"
         title="点击刷新一言"
       >
-        {loading ? '加载中...' : hitokoto?.hitokoto || '每日一言'}
-      </p>
+        {loading ? (
+          <span className="inline-block w-48 h-4 bg-white/60 rounded animate-pulse align-middle" />
+        ) : (
+          <>
+            <span>{hitokoto?.hitokoto || '每日一言'}</span>
+            {source && (
+              <span className="text-[11px] text-text-muted opacity-70 ml-2">—{source}</span>
+            )}
+          </>
+        )}
+      </div>
     </header>
   )
 }
