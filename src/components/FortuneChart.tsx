@@ -67,7 +67,7 @@ export default function FortuneChart({ indices }: Props) {
           display: false,
         },
         ticks: {
-          color: '#64748b',
+          color: '#9a8e83',
           font: {
             size: 12,
             weight: 500 as const,
@@ -89,10 +89,10 @@ export default function FortuneChart({ indices }: Props) {
         anchor: 'end' as const,
         align: 'top' as const,
         formatter: (value: number) => value + '分',
-        color: '#1e293b',
+        color: '#171411',
         font: {
           weight: 'bold' as const,
-          size: 14,
+          size: 12,
         },
         offset: 8,
       },

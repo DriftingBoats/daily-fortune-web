@@ -91,7 +91,7 @@ export default function ConstellationCard({ data, loading, error, selectedSign, 
                     : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
-                <span className="text-[11px] font-semibold whitespace-nowrap">{ENGLISH_TO_CHINESE_MAP[sign]}</span>
+                <span className="text-xs font-semibold whitespace-nowrap">{ENGLISH_TO_CHINESE_MAP[sign]}</span>
                 <span className="text-[9px] opacity-60 whitespace-nowrap">{CONSTELLATION_DATES[sign]}</span>
               </button>
             ))}
@@ -174,7 +174,7 @@ function ConstellationSkeleton() {
 function LuckyTag({ label, value, colorSwatch }: { label: string; value: string; colorSwatch?: string }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span className="text-[10px] text-text-muted mb-1">{label}</span>
+      <span className="text-xs text-text-muted mb-1">{label}</span>
       <div className="flex items-center gap-1.5">
         {colorSwatch && (
           <span

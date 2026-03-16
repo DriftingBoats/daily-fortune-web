@@ -46,7 +46,7 @@ export default function Header() {
           <>
             <span>{hitokoto?.hitokoto || '每日一言'}</span>
             {source && (
-              <span className="text-[11px] text-text-muted opacity-70 ml-2">—{source}</span>
+              <span className="text-xs text-text-muted opacity-70 ml-2">—{source}</span>
             )}
           </>
         )}

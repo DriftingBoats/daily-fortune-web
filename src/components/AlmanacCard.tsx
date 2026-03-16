@@ -22,31 +22,25 @@ function AlmanacSkeleton() {
         <div className="h-7 w-48 bg-[#ddd5c8]/60 rounded-lg" />
         <div className="h-4 w-32 bg-[#ddd5c8]/40 rounded" />
       </div>
-      {/* 区块2：宜忌 */}
-      <div className="pb-4 border-b border-fortune-border space-y-2">
-        <div className="flex items-start gap-3">
-          <div className="h-5 w-5 bg-green-200 rounded" />
-          <div className="flex gap-2 flex-wrap">
-            {[1,2,3,4].map(i => <div key={i} className="h-4 w-12 bg-green-100 rounded" />)}
-          </div>
+      {/* 区块2：宜忌居中 */}
+      <div className="pb-4 border-b border-fortune-border space-y-3 text-center">
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="h-5 w-8 bg-green-200 rounded" />
+          <div className="h-4 w-40 bg-green-100 rounded" />
         </div>
-        <div className="flex items-start gap-3">
-          <div className="h-5 w-5 bg-red-200 rounded" />
-          <div className="flex gap-2 flex-wrap">
-            {[1,2,3].map(i => <div key={i} className="h-4 w-12 bg-red-100 rounded" />)}
-          </div>
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="h-5 w-8 bg-red-200 rounded" />
+          <div className="h-4 w-36 bg-red-100 rounded" />
         </div>
       </div>
-      {/* 区块3：补充信息 */}
-      <div className="pb-4 border-b border-fortune-border space-y-2">
-        <div className="grid grid-cols-3 gap-2">
-          {[1,2,3].map(i => <div key={i} className="h-10 bg-white/50 rounded" />)}
-        </div>
-        <div className="h-8 bg-white/50 rounded" />
-      </div>
-      {/* 区块4：神位/冲煞/胎神 */}
-      <div className="grid grid-cols-3 gap-2">
-        {[1,2,3].map(i => <div key={i} className="h-12 bg-white/50 rounded" />)}
+      {/* 区块3：列表行 */}
+      <div className="space-y-0">
+        {[1,2,3,4,5].map(i => (
+          <div key={i} className="flex justify-between py-1.5 border-b border-fortune-border/50">
+            <div className="h-3 w-16 bg-[#ddd5c8]/50 rounded" />
+            <div className="h-3 w-24 bg-[#ddd5c8]/40 rounded" />
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -98,69 +92,45 @@ export default function AlmanacCard({ data, loading, error }: Props) {
         </p>
       </div>
 
-      {/* 区块2：宜忌内联平铺 */}
+      {/* 区块2：宜忌居中展示 */}
       {(yiItems.length > 0 || jiItems.length > 0) && (
-        <div className="mb-4 pb-4 border-b border-fortune-border space-y-2">
+        <div className="mb-4 pb-4 border-b border-fortune-border space-y-3 text-center">
           {yiItems.length > 0 && (
-            <div className="flex items-start gap-3">
-              <span className="text-xs font-bold text-white bg-green-600 w-5 h-5 flex-shrink-0 flex items-center justify-center rounded mt-0.5">宜</span>
-              <p className="text-xs text-green-700 leading-relaxed">{yiItems.join('　')}</p>
+            <div>
+              <span className="text-xs font-bold text-white bg-green-600 px-2 py-0.5 rounded">宜</span>
+              <p className="text-xs text-green-700 leading-relaxed mt-1.5">{yiItems.join('　')}</p>
             </div>
           )}
           {jiItems.length > 0 && (
-            <div className="flex items-start gap-3">
-              <span className="text-xs font-bold text-white bg-red-500 w-5 h-5 flex-shrink-0 flex items-center justify-center rounded mt-0.5">忌</span>
-              <p className="text-xs text-red-600 leading-relaxed">{jiItems.join('　')}</p>
+            <div>
+              <span className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded">忌</span>
+              <p className="text-xs text-red-600 leading-relaxed mt-1.5">{jiItems.join('　')}</p>
             </div>
           )}
         </div>
       )}
 
-      {/* 区块3：建除/五行/星宿/彭祖百忌 */}
-      {hasSupplementary && (
-        <div className={`mb-4 pb-4 ${hasFooter ? 'border-b border-fortune-border' : ''} space-y-2`}>
-          {(fortune_info.jianshen || fortune_info.wuxing || fortune_info.xingsu) && (
-            <div className="grid grid-cols-3 gap-2">
-              {fortune_info.jianshen && <KvItem label="建除" value={fortune_info.jianshen} />}
-              {fortune_info.wuxing && <KvItem label="五行" value={fortune_info.wuxing} />}
-              {fortune_info.xingsu && <KvItem label="星宿" value={fortune_info.xingsu} />}
-            </div>
-          )}
-          {fortune_info.pengzu && (
-            <div className="text-xs text-text-secondary leading-relaxed">
-              <span className="text-text-muted mr-1">彭祖百忌</span>
-              {fortune_info.pengzu}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 区块4：神位/冲煞/胎神 */}
-      {hasFooter && (
-        <div className="flex justify-around pt-1">
-          {fortune_info.shenwei && <InfoItem label="神位" value={fortune_info.shenwei} />}
-          {fortune_info.chongsha && <InfoItem label="冲煞" value={fortune_info.chongsha} />}
-          {fortune_info.taishen && <InfoItem label="胎神" value={fortune_info.taishen} />}
+      {/* 区块3：列表形式展示补充信息 */}
+      {(hasSupplementary || hasFooter) && (
+        <div className="space-y-0">
+          {fortune_info.jianshen && <ListRow label="建除十二值" value={fortune_info.jianshen} />}
+          {fortune_info.wuxing && <ListRow label="五行纳音" value={fortune_info.wuxing} />}
+          {fortune_info.xingsu && <ListRow label="星宿" value={fortune_info.xingsu} />}
+          {fortune_info.pengzu && <ListRow label="彭祖百忌" value={fortune_info.pengzu} />}
+          {fortune_info.shenwei && <ListRow label="神位" value={fortune_info.shenwei} />}
+          {fortune_info.chongsha && <ListRow label="冲煞" value={fortune_info.chongsha} />}
+          {fortune_info.taishen && <ListRow label="胎神" value={fortune_info.taishen} />}
         </div>
       )}
     </CardWrapper>
   )
 }
 
-function KvItem({ label, value }: { label: string; value: string }) {
+function ListRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-center">
-      <p className="text-[10px] text-text-muted mb-0.5">{label}</p>
-      <p className="text-xs text-text-secondary font-medium leading-snug">{value}</p>
-    </div>
-  )
-}
-
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="text-center">
-      <p className="text-[10px] text-text-muted mb-0.5">{label}</p>
-      <p className="text-xs text-text-secondary font-medium leading-snug">{value}</p>
+    <div className="flex items-baseline justify-between py-1.5 border-b border-fortune-border/50 last:border-0">
+      <span className="text-xs text-text-muted flex-shrink-0 mr-4">{label}</span>
+      <span className="text-sm text-text-primary text-right leading-relaxed">{value}</span>
     </div>
   )
 }
